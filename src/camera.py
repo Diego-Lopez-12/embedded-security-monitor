@@ -1,3 +1,28 @@
+"""
+camera.py
+
+Author: Diego Lopez
+Project: Embedded Security Monitoring System
+Created: June 2026
+Version: 1.0
+
+Description:
+Provides an interface between the application software and the 
+Raspberry Pi Camera Module 3. Handles image capture, video recording,
+and media file management so that other project components can
+interact with the camera through simple function calls.
+
+Dependencies:
+-subprocess
+-pathlib
+-Raspberry Pi Camera Software (rpicam-still, rpicam-vid)
+
+Functions:
+-take_photo()
+-record_photo()
+-generate_timestamp()
+"""
+
 import subprocess               #Used to run external programs, execute system commands, and manage new processes directly from code
 from pathlib import Path        #For interacting with filesystem paths
 from datetime import datetime   #Lets us add timestamps to filenames
