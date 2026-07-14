@@ -218,5 +218,8 @@ __marimo__/
 .streamlit/secrets.toml
 
 #Generated Media Files
-media/photos/*.jpg
-media/videos/*.h264
+media/photos/
+media/videos/
+
+#SQLite Database
+events.db
