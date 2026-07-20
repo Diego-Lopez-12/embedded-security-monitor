@@ -1,0 +1,133 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+
+    padding: 24px 40px;
+    background-color: #111827;
+    color: white;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.dashboard-header p {
+    margin: 0;
+    color: #d1d5db;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 16px;
+    border-radius: 20px;
+    background-color: #1f2937;
+    font-weight: bold;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #22c55e;
+}
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 24px;
+}
+
+.dashboard-card {
+    padding: 24px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card h2 {
+    margin-top: 0;
+}
+
+.events-card {
+    grid-column: 1 / -1;
+}
+
+.events-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.events-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.events-table th,
+.events-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: top;
+}
+
+.events-table th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-size: 14px;
+}
+
+.events-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.file-path {
+    max-width: 220px;
+    overflow-wrap: anywhere;
+    color: #4b5563;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+@media (max-width: 700px) {
+    .dashboard-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 24px;
+    }
+
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    .events-card {
+        grid-column: auto;
+    }
+
+    .events-table th,
+    .events-table td {
+        padding: 10px;
+        font-size: 13px;
+    }
+}

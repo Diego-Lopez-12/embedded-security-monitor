@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Security Monitor</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <div>
+            <h1>Embedded Security Monitoring System</h1>
+            <p>Raspberry Pi security dashboard</p>
+        </div>
+
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            {{ system_status }}
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <section class="dashboard-card">
+            <h2>System Status</h2>
+
+            <p>
+                Motion monitoring and event storage are operational.
+            </p>
+        </section>
+
+        <section class="dashboard-card">
+            <h2>Dashboard Information</h2>
+
+            <p>
+                Recent motion events are retrieved from the SQLite
+                database whenever this page is loaded.
+            </p>
+        </section>
+
+        <section class="dashboard-card events-card">
+            <h2>Recent Motion Events</h2>
+
+            {% if events %}
+                <div class="events-table-container">
+                    <table class="events-table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Timestamp</th>
+                                <th>Duration</th>
+                                <th>Photo</th>
+                                <th>Video</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for event in events %}
+                                <tr>
+                                    <td>#{{ event["id"] }}</td>
+
+                                    <td>
+                                        {{ event["timestamp"] }}
+                                    </td>
+
+                                    <td>
+                                        {{ event["duration_seconds"] }}
+                                        seconds
+                                    </td>
+
+                                    <td class="file-path">
+                                        {{ event["photo_path"] }}
+                                    </td>
+
+                                    <td class="file-path">
+                                        {{ event["video_path"] }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No motion events have been recorded yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

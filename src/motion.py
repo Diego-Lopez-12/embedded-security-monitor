@@ -1,9 +1,13 @@
 """
-motion_camera_test.py
+motion.py
 
-Purpose:
-Test integration between the PIR motion sensor and the camera module.
-When motion is detected, the program captures a photo and records a video.
+Author: Diego Lopez
+Project: Embedded Security Monitoring System
+
+Description:
+Monitors the PIR motion sensor and coordinates the system response when
+motion is detected. This module integrates the motion sensor, camera,
+and database subsystems into a single, event-driven workflow.
 """
 
 from gpiozero import MotionSensor
@@ -13,10 +17,6 @@ from signal import pause
 #instead of macine-specific absolute paths.
 from camera import take_photo, record_video, MEDIA_DIR
 from database import initialize_database, add_event
-
-
-# PIR sensor output is connected to GPIO17, physical pin 11.
-pir = MotionSensor(17)
 
 #Duration of each motion-triggered recording
 VIDEO_DURATION_SECONDS = 10
@@ -32,7 +32,7 @@ def handle_motion_event():
     -Record a video
     -Log the event to the database
 
-    Later, add:
+    Future Improvements:
     -notifications
     -dashboard updates
     -Storage management
@@ -66,17 +66,30 @@ def motion_detected():
     print("Motion detected.")
     handle_motion_event()
 
+def start_monitoring():
+    """
+    Initialize the motion monitoring system and begin
+    listening for motion events.
+    """
 
-#Make sure database and events table exists
-#before listening for motion events
-initialize_database()
+    # PIR sensor output is connected to GPIO17, physical pin 11.
+    pir = MotionSensor(17)
 
-("Motion-camera test initialized.")
-print("Waiting for motion...")
+    #Ensure database exists before monitoring begins
+    initialize_database()
 
-# Give gpiozero the function reference.
-# Do not use parentheses here.
-pir.when_motion = motion_detected
+    print("Embedded Security Monitoring System")
+    print("Motion monitoring initialized.")
+    print("Waiting for motion...")
 
-# Keep program running.
-pause()
+    #Register callback function
+    pir.when_motion = motion_detected
+
+    #Keep the program running indefinitely
+    pause()
+
+#Only start monitoring if this file is executed directly. This
+#allows app.py to import start_monitoring() without immediately
+#starting the sensor.
+if __name__ == "__main__":
+    start_monitoring()

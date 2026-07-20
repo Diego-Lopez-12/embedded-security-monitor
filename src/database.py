@@ -67,6 +67,31 @@ def add_event(timestamp, photo_path, video_path, duration_seconds):
     connection.commit()
     connection.close()
 
+def get_recent_events(limit=10):
+    """
+    Retrieve the most recent motion events from the database.
+    Takes a maximum number of events to return and returns a
+    list of database rows ordered from newest to oldest.
+    """
+    connection = sqlite3.connect(DATABASE_PATH)
+
+    #Return rows that can be accessed by column name.
+    connection.row_factory = sqlite3.Row
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, timestamp, photo_path, video_path, duration_seconds
+        FROM events
+        ORDER BY id DESC
+        LIMIT ?
+        """, (limit,))
+
+    events = cursor.fetchall()
+    connection.close()
+
+    return events
+
 if __name__ == "__main__":
     initialize_database()
     print(f"Database initialized at: {DATABASE_PATH}")
