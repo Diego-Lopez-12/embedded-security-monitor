@@ -92,6 +92,29 @@ def get_recent_events(limit=10):
 
     return events
 
+def get_event_by_id(event_id):
+    """
+    Retrieve one motion event using its database ID.
+    Takes the ID of the event to retrieve and returns
+    the matching event row, or None if it doesn't exist.
+    """
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, timestamp, photo_path, video_path, duration_seconds
+        FROM events
+        WHERE id = ?
+    """, (event_id,))
+
+    event = cursor.fetchone()
+
+    connection.close()
+
+    return event
+
 if __name__ == "__main__":
     initialize_database()
     print(f"Database initialized at: {DATABASE_PATH}")

@@ -37,6 +37,9 @@ MEDIA_DIR = PROJECT_ROOT / "media"
 PHOTO_DIR = MEDIA_DIR / "photos"
 VIDEO_DIR = MEDIA_DIR / "videos"
 
+#The Camera Currently Records at 30 Frames per Second
+VIDEO_FRAME_RATE = 30
+
 def take_photo(filename: str = None):
     """
     Capture an image using the Raspberry Pi Camera
@@ -67,33 +70,86 @@ def take_photo(filename: str = None):
 
 def record_video(filename: str = None, duration_ms: int = 5000):
     """
-    Record a video using the Raspberry Pi Camera
+    Record a video and store it as a valid MP4 file.
+
+    The Raspberry Pi first records a temporary raw H.264 stream.
+    FFmpeg then places that stream inside an MP4 container that
+    browsers and desktop media players can understand.
 
     Args:
-        -filename: Name of the video file to create
-        -duration_ms: Recording duration in miliseconds
+        filename: Optional name of the final MP4 file.
+        duration_ms: Recording duration in milliseconds.
 
     Returns:
-        -Full path to the saved video
-        -Timestamp used for filenames
+        A tuple containing:
+        - Full path to the saved MP4 video.
+        - Timestamp used for the filename.
     """
 
     timestamp = generate_timestamp()
 
-    #Use a timestamp to label the video
     if filename is None:
-        filename = f"video_{timestamp}.h264"
-    
-    #Ensure output folder exists before saving
+        filename = f"video_{timestamp}.mp4"
+
+    # Make sure custom filenames still use the MP4 extension.
+    final_filename = Path(filename).with_suffix(".mp4").name
+
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
-    output_path = VIDEO_DIR / filename
+    mp4_path = VIDEO_DIR / final_filename
+    temporary_h264_path = VIDEO_DIR / f"temporary_{timestamp}.h264"
 
-    #Run the Linux Command Used to Record a Video
-    #rpicam-vid -t <duration_ms> -o <output_path>
-    subprocess.run(["rpicam-vid", "-t", str(duration_ms), "-o", str(output_path)], check=True)
+    try:
+        # Step 1: Record a raw H.264 video stream.
+        subprocess.run(
+            [
+                "rpicam-vid",
+                "-t",
+                str(duration_ms),
+                "--codec",
+                "h264",
+                "-o",
+                str(temporary_h264_path)
+            ],
+            check=True
+        )
 
-    return output_path, timestamp
+        # Step 2: Package the raw H.264 stream inside an MP4 container.
+        #
+        # -framerate tells FFmpeg how quickly to display the raw frames.
+        # -c:v copy avoids re-encoding, keeping conversion fast.
+        # +faststart moves MP4 metadata to the beginning of the file,
+        # which helps browsers begin playback sooner.
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-framerate",
+                str(VIDEO_FRAME_RATE),
+                "-i",
+                str(temporary_h264_path),
+                "-c:v",
+                "copy",
+                "-movflags",
+                "+faststart",
+                str(mp4_path)
+            ],
+            check=True
+        )
+
+    except subprocess.CalledProcessError:
+        # Do not return a video path when recording or conversion fails.
+        if mp4_path.exists():
+            mp4_path.unlink()
+
+        raise
+
+    finally:
+        # Remove the temporary raw recording after conversion or failure.
+        if temporary_h264_path.exists():
+            temporary_h264_path.unlink()
+
+    return mp4_path, timestamp
 
 def generate_timestamp():
     return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

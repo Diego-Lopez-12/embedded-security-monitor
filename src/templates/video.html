@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Motion Event Video</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <div>
+            <h1>Motion Event Video</h1>
+            <p>Embedded Security Monitoring System</p>
+        </div>
+
+        <a
+            class="header-link"
+            href="{{ url_for('home') }}"
+        >
+            Back to Dashboard
+        </a>
+    </header>
+
+    <main class="media-page-container">
+        <section class="dashboard-card media-details-card">
+            <div class="media-page-heading">
+                <div>
+                    <h2>Event #{{ event["id"] }}</h2>
+
+                    <p class="media-timestamp">
+                        Recorded: {{ event["timestamp"] }}
+                    </p>
+                </div>
+
+                <span class="media-duration">
+                    {{ event["duration_seconds"] }} seconds
+                </span>
+            </div>
+
+            <div class="video-player-container">
+                <video
+                    class="video-player"
+                    controls
+                    preload="metadata"
+                >
+                    <source
+                        src="{{ url_for(
+                            'serve_media',
+                            filename=event['video_path']
+                                | replace('media/', '', 1)
+                        ) }}"
+                        type="video/mp4"
+                    >
+
+                    Your browser does not support HTML video playback.
+                </video>
+            </div>
+
+            <div class="media-file-information">
+                <h3>Video File</h3>
+
+                <p>{{ video_filename }}</p>
+            </div>
+
+            <a
+                class="media-link"
+                href="{{ url_for('home') }}"
+            >
+                Return to Dashboard
+            </a>
+        </section>
+    </main>
+</body>
+</html>

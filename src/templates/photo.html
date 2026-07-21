@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Motion Event Photo</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <div>
+            <h1>Motion Event Photo</h1>
+            <p>Embedded Security Monitoring System</p>
+        </div>
+
+        <a
+            class="header-link"
+            href="{{ url_for('home') }}"
+        >
+            Back to Dashboard
+        </a>
+    </header>
+
+    <main class="media-page-container">
+        <section class="dashboard-card media-details-card">
+            <div class="media-page-heading">
+                <div>
+                    <h2>Event #{{ event["id"] }}</h2>
+
+                    <p class="media-timestamp">
+                        Captured: {{ event["timestamp"] }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="photo-container">
+                <img
+                    class="event-photo"
+                    src="{{ url_for(
+                        'serve_media',
+                        filename=event['photo_path']
+                            | replace('media/', '', 1)
+                    ) }}"
+                    alt="Photo captured during motion event {{ event['id'] }}"
+                >
+            </div>
+
+            <div class="media-file-information">
+                <h3>Photo File</h3>
+
+                <p>{{ photo_filename }}</p>
+            </div>
+
+            <a
+                class="media-link"
+                href="{{ url_for('home') }}"
+            >
+                Return to Dashboard
+            </a>
+        </section>
+    </main>
+</body>
+</html>

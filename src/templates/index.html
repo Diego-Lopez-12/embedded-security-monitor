@@ -66,7 +66,9 @@
                         <tbody>
                             {% for event in events %}
                                 <tr>
-                                    <td>#{{ event["id"] }}</td>
+                                    <td>
+                                        #{{ event["id"] }}
+                                    </td>
 
                                     <td>
                                         {{ event["timestamp"] }}
@@ -77,12 +79,45 @@
                                         seconds
                                     </td>
 
-                                    <td class="file-path">
-                                        {{ event["photo_path"] }}
+                                    <td>
+                                        {% if event["photo_path"] %}
+                                            <a
+                                                class="media-link"
+                                                href="{{ url_for(
+                                                    'show_photo',
+                                                    event_id=event['id']
+                                                ) }}"
+                                            >
+                                                Show Photo
+                                            </a>
+                                        {% else %}
+                                            <span class="unavailable-text">
+                                                Unavailable
+                                            </span>
+                                        {% endif %}
                                     </td>
 
-                                    <td class="file-path">
-                                        {{ event["video_path"] }}
+                                    <td>
+                                        {% if
+                                            event["video_path"]
+                                            and event["video_path"]
+                                                .lower()
+                                                .endswith(".mp4")
+                                        %}
+                                            <a
+                                                class="media-link"
+                                                href="{{ url_for(
+                                                    'show_video',
+                                                    event_id=event['id']
+                                                ) }}"
+                                            >
+                                                Show Video
+                                            </a>
+                                        {% else %}
+                                            <span class="unavailable-text">
+                                                Unavailable
+                                            </span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
