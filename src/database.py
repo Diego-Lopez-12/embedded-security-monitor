@@ -115,6 +115,116 @@ def get_event_by_id(event_id):
 
     return event
 
+def get_event_count():
+    """
+    Return the total number of event records currently stored.
+    """
+
+    connection = sqlite3.connect(DATABASE_PATH)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM events
+    """)
+
+    total_events = cursor.fetchone()[0]
+    connection.close()
+
+    return total_events
+
+def get_events_page(page=1, events_per_page=25):
+    """
+    Retrieve one page of motion events.
+
+    Args:
+        page: Page number beginning at 1.
+        events_per_page: Number of events shown on each page.
+
+    Returns:
+        Event rows ordered from newest to oldest.
+    """
+
+    offset = (page - 1) * events_per_page
+
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            timestamp,
+            photo_path,
+            video_path,
+            duration_seconds
+        FROM events
+        ORDER BY id DESC
+        LIMIT ?
+        OFFSET ?
+    """, (
+        events_per_page,
+        offset
+    ))
+
+    events = cursor.fetchall()
+    connection.close()
+
+    return events
+
+
+
+def get_dashboard_statistics():
+    """
+    Calculate statistics to be used by the Flask dashboard.
+    
+    Returns a dictionary containing:
+     - Total # of Recorded Events
+     - Total video recording time
+     - Most recent event
+    """
+
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+
+    cursor = connection.cursor()
+
+    #COUNT calculates the number of database rows
+    #SUM adds all recorded video durations together.
+    cursor.execute("""
+        SELECT
+            COUNT(*) AS total_events,
+            COALESCE(SUM(duration_seconds), 0)
+                AS total_recording_seconds
+            FROM events
+    """)
+
+    totals = cursor.fetchone()
+
+    #The highest event ID represents most recently inserted event
+    cursor.execute("""
+        SELECT
+            id,
+            timestamp,
+            photo_path,
+            video_path,
+            duration_seconds
+        FROM events
+        ORDER by id DESC
+        LIMIT 1
+    """)
+
+    latest_event = cursor.fetchone()
+
+    connection.close()
+
+    return {
+        "total_events": totals["total_events"],
+        "total_recording_seconds":
+            totals["total_recording_seconds"],
+        "latest_event": latest_event
+    }
+
 if __name__ == "__main__":
     initialize_database()
     print(f"Database initialized at: {DATABASE_PATH}")

@@ -38,27 +38,51 @@
                     <h2>Event #{{ event["id"] }}</h2>
 
                     <p class="media-timestamp">
-                        Captured: {{ event["timestamp"] }}
+                        Captured:
+                        {{ event["formatted_timestamp"] }}
                     </p>
                 </div>
+
+                {% if event["photo_available"] %}
+                    <span class="available-badge">
+                        Photo Available
+                    </span>
+                {% else %}
+                    <span class="missing-badge">
+                        File Missing
+                    </span>
+                {% endif %}
             </div>
 
-            <div class="photo-container">
-                <img
-                    class="event-photo"
-                    src="{{ url_for(
-                        'serve_media',
-                        filename=event['photo_path']
-                            | replace('media/', '', 1)
-                    ) }}"
-                    alt="Photo captured during motion event {{ event['id'] }}"
-                >
-            </div>
+            {% if event["photo_available"] %}
+                <div class="photo-container">
+                    <img
+                        class="event-photo"
+                        src="{{ url_for(
+                            'serve_media',
+                            filename=event['photo_path']
+                                | replace('media/', '', 1)
+                        ) }}"
+                        alt="Photo captured during motion event {{ event['id'] }}"
+                    >
+                </div>
+            {% else %}
+                <div class="media-error-state">
+                    <h3>Photo File Not Found</h3>
+
+                    <p>
+                        The database record exists, but the associated
+                        photo is no longer present in the media folder.
+                    </p>
+                </div>
+            {% endif %}
 
             <div class="media-file-information">
                 <h3>Photo File</h3>
 
-                <p>{{ photo_filename }}</p>
+                <p>
+                    {{ photo_filename or "No filename available" }}
+                </p>
             </div>
 
             <a

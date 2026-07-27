@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ error_title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <div>
+            <h1>Embedded Security Monitoring System</h1>
+            <p>Raspberry Pi security dashboard</p>
+        </div>
+    </header>
+
+    <main class="error-page-container">
+        <section class="dashboard-card error-card">
+            <p class="error-code">404</p>
+
+            <h2>{{ error_title }}</h2>
+
+            <p>{{ error_message }}</p>
+
+            <a
+                class="media-link"
+                href="{{ url_for('home') }}"
+            >
+                Return to Dashboard
+            </a>
+        </section>
+    </main>
+</body>
+</html>
