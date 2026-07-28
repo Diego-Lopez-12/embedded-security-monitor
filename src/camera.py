@@ -40,6 +40,16 @@ VIDEO_DIR = MEDIA_DIR / "videos"
 #The Camera Currently Records at 30 Frames per Second
 VIDEO_FRAME_RATE = 30
 
+#Capture Configuration
+CAPTURE_WIDTH = 1920
+CAPTURE_HEIGHT = 1080
+
+#Time to allow the camera to adjust exposure and focus
+#before capturing a still image. 500-750ms provided the
+#best balance between capture speed and image quality
+#during testing.
+PHOTO_CAPTURE_TIMEOUT_MS= 750
+
 def take_photo(filename: str = None):
     """
     Capture an image using the Raspberry Pi Camera
@@ -64,7 +74,21 @@ def take_photo(filename: str = None):
 
     #Run the Linux Command Used to Take a Photo
     #rpicam-still -o <output_path>
-    subprocess.run(["rpicam-still", "-o", str(output_path)], check=True)
+    subprocess.run(
+        [
+            "rpicam-still",
+            "--width",
+            str(CAPTURE_WIDTH),
+            "--height",
+            str(CAPTURE_HEIGHT),
+            "--timeout",
+            str(PHOTO_CAPTURE_TIMEOUT_MS),   #--timeout __ gives __ seconds to settle before capture
+            "--nopreview",                   #Prevents preiew window from being displayed
+            "-o",
+            str(output_path)
+        ],
+        check=True
+    )
 
     return output_path, timestamp
 
@@ -106,6 +130,12 @@ def record_video(filename: str = None, duration_ms: int = 5000):
                 "rpicam-vid",
                 "-t",
                 str(duration_ms),
+
+                "--width",
+                str(CAPTURE_WIDTH),
+                "--height",
+                str(CAPTURE_HEIGHT),
+
                 "--codec",
                 "h264",
                 "-o",

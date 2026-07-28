@@ -10,6 +10,8 @@ motion is detected. This module integrates the motion sensor, camera,
 and database subsystems into a single, event-driven workflow.
 """
 
+import logging
+
 from gpiozero import MotionSensor
 from signal import pause
 
@@ -17,6 +19,9 @@ from signal import pause
 #instead of macine-specific absolute paths.
 from camera import take_photo, record_video, MEDIA_DIR
 from database import initialize_database, add_event
+from logging_config import setup_logging
+
+logger = logging.getLogger(__name__)
 
 #Duration of each motion-triggered recording
 VIDEO_DURATION_SECONDS = 10
@@ -38,33 +43,41 @@ def handle_motion_event():
     -Storage management
     """
 
-    print("Capturing photo...")
-    photo_path, timestamp = take_photo()
-    print(f"Photo saved to: {photo_path}")
-
-    print("Recording video...")
-    video_path, _ = record_video(duration_ms=VIDEO_DURATION_MS)
-    print(f"Video saved to: {video_path}")
-
-    print("Logging event to database...")
-    add_event(
-        timestamp=timestamp,
-        photo_path=str(photo_path.relative_to(MEDIA_DIR.parent)),
-        video_path=str(video_path.relative_to(MEDIA_DIR.parent)),
-        duration_seconds=VIDEO_DURATION_SECONDS
-    )
-
-    print("Motion event logged.")
-    print("Motion event complete. Waiting for next motion...")
-
+    try:
+        logger.info("Capturing photo...")
+        photo_path, timestamp = take_photo()
+        logger.info(
+            "Photo saved successfully: %s",
+            photo_path
+        )
+    
+        logger.info("Recording video...")
+        video_path, _ = record_video(duration_ms=VIDEO_DURATION_MS)
+        logger.info(
+            "Video saved successfully: %s",
+            video_path
+        )
+    
+        logger.info("Saving motion event to database...")
+        add_event(
+            timestamp=timestamp,
+            photo_path=str(photo_path.relative_to(MEDIA_DIR.parent)),
+            video_path=str(video_path.relative_to(MEDIA_DIR.parent)),
+            duration_seconds=VIDEO_DURATION_SECONDS
+        )
+    
+        logger.info("Motion event completed and stored successfully.")
+    except Exception:
+        logger.exception("Motion event failed. Monitoring will continue")
 
 def motion_detected():
     """
     Callback function that runs when the PIR sensor detects motion.
     """
 
-    print("Motion detected.")
+    logger.info("Motion detected.")
     handle_motion_event()
+    logger.info("Waiting for the next motion event...")
 
 def start_monitoring():
     """
@@ -78,9 +91,9 @@ def start_monitoring():
     #Ensure database exists before monitoring begins
     initialize_database()
 
-    print("Embedded Security Monitoring System")
-    print("Motion monitoring initialized.")
-    print("Waiting for motion...")
+    logger.info("Embedded Security Monitoring System Starting.")
+    logger.info("Motion sensor initialized on GPIO17.")
+    logger.info("Waiting for motion...")
 
     #Register callback function
     pir.when_motion = motion_detected
@@ -92,4 +105,5 @@ def start_monitoring():
 #allows app.py to import start_monitoring() without immediately
 #starting the sensor.
 if __name__ == "__main__":
+    setup_logging()
     start_monitoring()
