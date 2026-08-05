@@ -65,7 +65,13 @@ def add_event(timestamp, photo_path, video_path, duration_seconds):
     """, (timestamp, photo_path, video_path, duration_seconds))
 
     connection.commit()
+
+    #Save the ID SQLite automatically assigned to this event
+    event_id = cursor.lastrowid
+
     connection.close()
+
+    return event_id
 
 def get_recent_events(limit=10):
     """
@@ -114,6 +120,56 @@ def get_event_by_id(event_id):
     connection.close()
 
     return event
+
+def get_oldest_event():
+    """
+    Retrieve the oldest motion event currently stored.
+
+    Returns: The oldest event row, or None if the database is empty
+    """
+
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row    #Access rows by column name
+
+    cursor = connection.cursor()
+
+    #Retrieve oldest event by selecting the lowest ID.
+    cursor.execute("""
+        SELECT
+            id,
+            timestamp,
+            photo_path,
+            video_path,
+            duration_seconds
+        FROM events
+        ORDER by id ASC
+        LIMIT 1
+    """)
+
+    event = cursor.fetchone()
+
+    connection.close()
+
+    return event
+
+def delete_event_by_id(event_id):
+    """
+    Delete a motion event from the database.
+
+    Args:
+    - event_id: Database ID of the event to remove
+    """
+
+    connection = sqlite3.connect(DATABASE_PATH)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        DELETE FROM events
+        WHERE id = ?
+    """, (event_id,))
+
+    connection.commit()
+    connection.close()
 
 def get_event_count():
     """

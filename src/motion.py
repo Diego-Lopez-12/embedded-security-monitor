@@ -16,10 +16,12 @@ from gpiozero import MotionSensor
 from signal import pause
 
 #MEDIA_DIR is imported so relative file paths can be stored
-#instead of macine-specific absolute paths.
+#instead of machine-specific absolute paths.
 from camera import take_photo, record_video, MEDIA_DIR
 from database import initialize_database, add_event
+from storage_manager import cleanup_if_needed
 from logging_config import setup_logging
+from notification import send_motion_notification
 
 logger = logging.getLogger(__name__)
 
@@ -33,17 +35,18 @@ def handle_motion_event():
     Handles everything that should happen after motion is detected.
 
     Current Responsibilities:
+    -Check available storage
     -Take a photo
     -Record a video
     -Log the event to the database
-
-    Future Improvements:
-    -notifications
-    -dashboard updates
-    -Storage management
+    -Send a push notification
     """
 
     try:
+        #Check available storage before creating new media.
+        logger.info("Checking available storage.")
+        cleanup_if_needed()
+
         logger.info("Capturing photo...")
         photo_path, timestamp = take_photo()
         logger.info(
@@ -59,16 +62,27 @@ def handle_motion_event():
         )
     
         logger.info("Saving motion event to database...")
-        add_event(
+        #Store the completed motion event in the SQLite database.
+        event_id = add_event(
             timestamp=timestamp,
             photo_path=str(photo_path.relative_to(MEDIA_DIR.parent)),
             video_path=str(video_path.relative_to(MEDIA_DIR.parent)),
             duration_seconds=VIDEO_DURATION_SECONDS
         )
+
+        logger.info(
+            "Motion event #%s completed and stored successfully.",
+            event_id
+        )
+
+        #Send a push notification after the event has been fully recorded.
+        send_motion_notification(
+            event_id=event_id,
+            timestamp=timestamp
+        )
     
-        logger.info("Motion event completed and stored successfully.")
     except Exception:
-        logger.exception("Motion event failed. Monitoring will continue")
+        logger.exception("Motion event failed. Monitoring will continue.")
 
 def motion_detected():
     """

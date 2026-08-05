@@ -48,7 +48,7 @@ CAPTURE_HEIGHT = 1080
 #before capturing a still image. 500-750ms provided the
 #best balance between capture speed and image quality
 #during testing.
-PHOTO_CAPTURE_TIMEOUT_MS= 750
+PHOTO_CAPTURE_TIMEOUT_MS= 500
 
 def take_photo(filename: str = None):
     """

@@ -223,3 +223,6 @@ media/videos/
 
 #SQLite Database
 events.db
+
+#.env File
+.env
